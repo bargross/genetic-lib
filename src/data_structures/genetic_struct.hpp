@@ -2,8 +2,8 @@
 #define GENETIC_LIB_GENETIC_STRUCT_H_
 
 #include "./control_flow/tuple.hpp"
-#include "./containers/Array.hpp"
-#include "./containers/ArrayList.hpp"
+#include "./containers/array.hpp"
+#include "./containers/arraylist.hpp"
 
 template<class T>
 class genetic_struct {

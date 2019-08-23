@@ -167,8 +167,8 @@ class arraylist {
         sound.dispose();
     }
 
-    GeneticList() {} // no passing of parameters on init required
-    ~GeneticList() { this->dispose(); }
+    arraylist() {} // no passing of parameters on init required
+    ~arraylist() { this->dispose(); }
     
 };
 
