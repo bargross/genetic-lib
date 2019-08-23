@@ -1,0 +1,33 @@
+{
+    "name": "genetic-lib",
+    "author": "1.0.0",
+    "description": "",
+    "homepage": "",
+    "license": "Apache License 2.0",
+    "version": "",
+    "private": true,
+    
+    "scripts": {
+        "start": "",
+        "unit": "",
+        "test": "",
+        "lint": "",
+        "build": ""
+    },
+    
+    "keywords":"",
+    "repository":"https://github.com/bargross/genetic-lib",
+    "main": "src/genetic_lib.hpp",
+    "dependencies": {
+
+    },
+    "devDependencies": {
+
+    },
+    "engines": {
+
+    },
+    "browserlist": {
+
+    }
+}
