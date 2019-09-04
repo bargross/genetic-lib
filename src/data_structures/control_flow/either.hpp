@@ -15,13 +15,11 @@ class either
 
     bool is_array = false;
 
-    void stop()
-    {
+    void stop() {
         while (1) { }
     } // forces the compiler to stop from executing any further
     
-    void error(std::string str)
-    {
+    void error(std::string str) {
         str = "Runtime Error: [ " + str + " ]";
         std::cout << str << std::endl;
 
@@ -30,33 +28,28 @@ class either
 
   public: 
 
-    either(A element)
-    {
+    either(A element) {
         element1 = element;
         element2 = nullptr;
     }
 
-    either(B element)
-    {
+    either(B element) {
         element2 = element;
         element1 = nullptr;
     }
-    ~either()
-    {
+    ~either() {
         delete element1;
         delete element2;
     }
 
     // operators
 
-    void operator=(A element)
-    {
+    void operator=(A element) {
         element1 = element;
         element2 = nullptr;
     }
 
-    void operator=(B element)
-    {
+    void operator=(B element) {
         element2 = element;
         element1 = nullptr;
     }

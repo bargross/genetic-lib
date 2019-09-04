@@ -3,9 +3,9 @@
 
 #include "./array.hpp";
 
-class Sounds   : array<long> {};
-class ParentA  : array<int>  {};
-class ParentB  : array<int>  {};
-class ParentId : array<int>  {};
+class sound   : array<long> {};
+class parent_a  : array<int>  {};
+class parent_b : array<int>  {};
+class parent_id : array<int>  {};
 
 #endif

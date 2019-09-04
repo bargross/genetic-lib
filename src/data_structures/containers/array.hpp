@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <string>
 #include <iostream>
+#include <iterator>
+#include <algorithm>
 
 
 /*
@@ -20,56 +22,32 @@ class array {
         T* memory_chunk = nullptr;
         int last_value = -1;
         size_t initial_length = 0;
+        int limit = -1;
 
         // void stop() { while(1) {} } // forces and stops the compiler from executing the script 
         void error (std::string message) {
             std::cerr << ("Runtime Error: [ " + (message) + " ]") << std::endl;
         }
-        
-        // TODO: Sector Search -> Not working so far, will look for solutions to sector split problem
-        // Tuple<int, int> split_by_sectors(int length) {
-        //     const int total_sectors = length / (length % 10); 
-        //     Tuple<int, int> sectors;
-        //     Tuple<int, int> current_sectors;
-                
-        //     for(int iSector = 0; iSector < total_sectors; ++iSector) {
-        //         if(iSector == 0) {
-        //             sectors.add_param1(0);
-        //             sectors.add_param2(iSector + (int)(length % 10));
-        //         }
-        //         else {
-        //             sectors.add_param1(sectors.get_param1(iSector - 1) + 1);
-        //             sectors.add_param2(sectors.get_param2(iSector) + (int)(length % 10));
-        //         }
-        //     }
 
-        //     return sectors;
-        // }
-
-        bool isSorted(T array[], T array2[]) {
-            if(sizeof(array) < sizeof(array2)) return false;
-            else {
-                int length = sizeof(array);
-                for(int iElem = 0; iElem < length; ++iElem)
-                    if(array[iElem] == array2[iElem]) continue;
-                    else return false;
-            }
-            return true;
+        bool is_sorted(T container[]) {
+            return std::is_sorted( std::begin(container), std::end(container));
         }
 
-        bool binary_search(T* container, T value, int min, int max) {
+        int binary_search(T* container, T value, int min, int max) {
             const int mid = (min + max) / 2;
-            const T& sorted_collection = sort(container, container+(sizeof(container)));
-            container = !this->isSorted(container, sorted_collection) ? sorted_collection : container;
+            if(!this->is_sorted(container)) {
+                container = std::sort(container, this->size_of(container));
+            };
 
             if(max < min) return -1;
-            else if(value > container[mid]) return binary_search(container, value, min, max );
+            else if(value > container[mid]) return binary_search(container, value, min, max + 1);
             else if(value < container[mid]) return binary_search(container, value, mid - 1, max);
             else if(value == container[mid]) return mid;
             else return -1;
         }
 
     public:
+
         T get(int index) {
             if(index >= 0 && index < last_value) return memory_chunk[index];
             else {
@@ -88,14 +66,8 @@ class array {
 
         void remove(int index) {
             if(index > 0 && index < last_value) {
-                // TODO: figure out whether to allocate memory in the stack or the heap
-                T* temp = new T[(size_t)last_value];
-
-                // approach below requires manual dealocation of memory in destructor C style
-                // e.g.: free(memory_chunk) etc...
-                // T* temp = new (std::nothrow [last_value-1);
-                
                 int count = 0; 
+                T* temp = new  T[(size_t)(last_value+4)];
                 for(int aIndex = 0; aIndex < last_value; ++aIndex) {
                     if(aIndex == index) continue;
                     else temp[count++] = memory_chunk[aIndex];
@@ -106,32 +78,47 @@ class array {
             } else error("Invalid index");
         }
 
+        void add_limit(int limit=-1) {
+            this->limit = limit;
+        }
+
         // checks the container for the specific value and indexof looks for the index of the specific value
         // this helps reduce code base if inserted at the root structure
         bool contains(T value) {
             return binary_search(memory_chunk, value, 0, last_value) != -1;
         }
-        bool indexof(T value) {
+        int indexof(T value) {
             return binary_search(memory_chunk, value, 0, last_value); 
         }
 
+        int size_of(T* container[]) {
+            return sizeof(container)/sizeof(*container);
+        }
+
         void remake(size_t new_size, T memory_chunk[]) {
+            if(new_size > this->limit) {
+                this->error("something");
+                return;
+            }
+
             // create new array dynamically with new size
-            T* new_memory_chunk = new T[new_size];
+            T* temp_memory_chunk = new  T[new_size];
             
             // copy all elements to the new container
             for(int iValue = 0; iValue < sizeof(memory_chunk); ++iValue) { 
                 if(memory_chunk[iValue] == 0 || memory_chunk[iValue] == nullptr)
                     continue;
 
-                else new_memory_chunk[iValue] = memory_chunk[iValue];
+                else {
+                    temp_memory_chunk[iValue] = memory_chunk[iValue];
+                }
             }
 
             // dispose of the old array
             delete[] memory_chunk;
             
             // point the old to the new array
-            memory_chunk = new_memory_chunk;
+            memory_chunk = temp_memory_chunk;
         }
         
         // ============================================
@@ -145,13 +132,13 @@ class array {
         }
         
         //
-        static void* operator new(size_t size) {
-            return new (std::nothrow) T[size];
-        }
+        // static void* operator new(size_t size) {
+        //     return new T[size];
+        // }
 
         //
         static void* operator new[](size_t size, T container[]) {
-            void* ptr = new (std::nothrow) T[size];
+            void* ptr = new T[size];
             
             if(ptr != NULL) {
                 ptr = container;
@@ -162,7 +149,7 @@ class array {
         
         // overloaded indexer operator and assignment operator
         void operator [](size_t length) { memory_chunk = new T[length]; }
-        // TODO: amend this overloaded version of =, this cannot change the reference of the class for an instance of the same class
+   
         // will have to set the properties manually
         void operator =(const array<T> array) { 
             this->initial_length = array.initial_length;
@@ -184,7 +171,7 @@ class array {
                 delete[] memory_chunk;
 
                 this->initial_length = (size_t)5;
-                memory_chunk = new T[this->initial_length];
+                memory_chunk = new  T[this->initial_length];
             } else {
                 int element_count = 0;
                 if(count == 0) {
@@ -193,7 +180,7 @@ class array {
                     element_count = count;
                 }
 
-                T* temp = new (std::nothrow) T[(size_t)count];
+                T* temp = new  T[(size_t)count];
                 for(int index=0; index < count; ++index) {
                     temp[index] = memory_chunk[index];
                 }
@@ -203,22 +190,36 @@ class array {
             }
         }
 
-        int size() { return last_value+1; }
-        void dispose() {
-            delete[] memory_chunk;
+        void resize(size_t new_size) {
+            T* temp = new T[new_size];
+            for(int index=0; index < this->last_value+1; ++index) {
+                temp[index] = this->memory_chunk[index];
+            }
+            
+            delete[] this->memory_chunk;
+            this->memory_chunk = temp;
         }
+
+        int size() { return last_value+1; }
+        void dispose() { delete[] memory_chunk; }
         
-        T* get_dynamic_array() { return memory_chunk; }
-        void set_dynamic_array(T* array) { memory_chunk = array; }
-        T& get_memory_address() { return &memory_chunk; }
+        T* get_dynamic_array() { return this->memory_chunk; }
+        void set_dynamic_array(T* dynamic_array) { this->memory_chunk = dynamic_array; }
+        // T& get_memory_address() { return &(this->memory_chunk); }
 
         // Constructors & Destructor
         array() {
             this->initial_length = 5;
-            this->memory_chunk = new (std::nothrow) T[this->initial_length];
+            this->memory_chunk = new  T[this->initial_length];
         }
         array(size_t size) {
-            this->initial_length = size; 
+            if(size < (size_t)this->limit) {
+                this->initial_length = size; 
+            } else {
+                this->initial_length = 5;
+            }
+
+            this->memory_chunk = new T[this->initial_length];
         }
         array(const array<T>& array) {
             this->memory_chunk = array.memory_chunk;

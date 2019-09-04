@@ -1,4 +1,4 @@
-#include "genetic_lib.hpp"
+#include "../genetic_lib.hpp"
 #include <iostream>
 #include <random>
 
@@ -46,7 +46,7 @@ bool genetic_lib<T>::equality_of(int chromosomeA[], int chromosomeB[]) {
 
 template<class T>
 void genetic_lib<T>::evaluate(int mysound[], int roulette) {
-  const auto& replacement = chromosome_struct->get_soundsa();
+  const auto& replacement = chromosome_struct->get_sound_a();
 
   // we check the roulette value
   if (roulette >= 0 && roulette <= 50)
@@ -69,19 +69,16 @@ void genetic_lib<T>::crossover(genetic_struct<T> nStruct) {
   int start = 0;
   int Cpoint = random(start, nStruct.parameters);
   int mutate = 2;
-
-  const auto& a_replacement = nStruct.get_soundsa();
-  const auto& b_replacement = nStruct.get_soundsb();
   
   for (int strand = 0; strand <= nStruct.parameters; ++strand) {
-    a_replacement[strand] = b_replacement[strand];
+    parentA[strand] = parentB[strand];
 
     int cosmic = 0;
     for(int strand =0; strand <=  nStruct.parameters; ++strand) {
 
       cosmic = random(set1A, set1B);
       if(cosmic <= mutate)
-        a_replacement[strand] = random(set1A, set1B);
+        parentA[strand] = random(set1A, set1B);
     }
   }
 }
@@ -92,20 +89,17 @@ template<class T>
 void genetic_lib<T>::crossover(int parentA[], int parentB[]) {
   int Cpoint = random(set1A, chromosome_struct->parameters);
   int mutate = random(set1A, set2B);
-  const auto& a_replacement = parentA;
-  const auto& b_replacement = parentB;
 
   for(int cut_point = Cpoint; cut_point < chromosome_struct->parameters; ++cut_point){
     // parentA[i] = parentB[i];
 
-    a_replacement[cut_point] = b_replacement[cut_point];
+    parentA[cut_point] = parentB[cut_point];
 
     int cosmic = 0;
-
     for(int strand = 0; strand < chromosome_struct->parameters; ++strand) {
       cosmic = random(set2A, set2B);
       if(cosmic <= mutate)
-        a_replacement[strand] = random(set1A, set1B);
+        parentA[strand] = random(set1A, set1B);
     }
   }
 }
@@ -119,17 +113,14 @@ void genetic_lib<T>::average_crossover(T parentA[], T parentB[], int mutate_valu
   int container[sizeof(parentA)]; // = parentA;
   
   populate(container, parentA);
-  
-  const auto& parent_a_temp = parentA;
-  const auto& parent_b_temp = parentB;
 
   for(int strand=0; strand < chromosome_struct->parameters; ++strand) {
-    parent_a_temp[strand] = (parent_a_temp[strand] + parent_b_temp[strand]) / 2;
+    parentA[strand] = (parentA[strand] + parentB[strand]) / 2;
     int cosmic = random(set2A, set2B),
         rand_strand = random(set2A, chromosome_struct->parameters);
 
     if(cosmic <= mutate_value)
-      parent_a_temp[rand_strand] = random(set1A, set1B);
+      parentA[rand_strand] = random(set1A, set1B);
   }
 
   if(equality_of(container, parentA) || equality_of(parentA, parentB)) {
@@ -138,7 +129,7 @@ void genetic_lib<T>::average_crossover(T parentA[], T parentB[], int mutate_valu
       is_equal = true;
 
       int rand_strand = random(set1A, chromosome_struct->parameters);
-      parent_a_temp[rand_strand] = random(set2A, set2B);
+      parentA[rand_strand] = random(set2A, set2B);
 
       is_equal = equality_of(container, parentA) && equality_of(parentA, parentB);
     }
@@ -170,11 +161,8 @@ void genetic_lib<T>::internal_crossover(const T parentA[], const T parentB[], in
       strandIndex = 0,
       mutate = random(set1A, 20);
 
-  int    random_cpoint = random(set1A, set1B);
+  int random_cpoint = random(set1A, set1B);
   int container[chromosome_struct->parameters];
-
-  const auto& parent_a_temp = parentA;
-  const auto& parent_b_temp = parentB;
 
   for(int strand=0; strand < coexistance_cpoint && internal >= 0; ++strand) {
     int reverse_distance = coexistance_cpoint - (coexistance_cpoint / 2),
@@ -292,8 +280,8 @@ void genetic_lib<T>::crossover_selector(const T parentA[], const T parentB[], in
 // in Arunido IDE values are from 0-2
 template<class T>
 void genetic_lib<T>::crossover_selector(int co_ext_crossover, CROSSOVER type) {
-  const auto& parent_a_temp = chromosome_struct->get_soundsa();
-  const auto& parent_b_temp = chromosome_struct->get_soundsb();
+  const int* parent_a_temp = chromosome_struct->get_sound_a();
+  const int* parent_b_temp = chromosome_struct->get_sound_b();
 
   switch(type) {
     case INTERNAL:   // Arduino equivalent = 0
@@ -319,28 +307,28 @@ void genetic_lib<T>::crossover_selector(int co_ext_crossover, CROSSOVER type) {
 // so f(x) = x <= 50 = round to 0 || f(x) = x >= 970 = round to 1023
 template<class T>
 void genetic_lib<T>::read_from_AtoB(int index) {
-  const auto& sound_temp = chromosome_struct->get_sounds();
-  const auto sound_value = sound_temp[index];
+  const long* sound_temp = chromosome_struct->get_sound();
+  const long sound_value = sound_temp[index];
   
   if(sound_value <= 50)
     sound_temp[index] = 0;
 
   else if(sound_value >= 970)
-    sound_temp[index] = 1023;
+    *sound_temp[index] = 1023;
 }
 
 // Overloaded method
 template<class T>
 genetic_struct<T> genetic_lib<T>::read_chms_sound(int index) {
-  const auto& sound_temp = chromosome_struct->get_sounds();
+  const auto sound_temp = chromosome_struct->get_sound();
   if(sound_temp[index] <= 50)
     sound_temp[index] = 0;
 
   else if(sound_temp[index] >= 970)
     sound_temp[index] = 1023;
 
-  long temporary_container[sizeof(sound_temp)];
-
+  // long temporary_container[sizeof(sound_temp)];
+  long temporary_container[(size_t)chromosome_struct->get_params()];
   for(int iVal = 0; iVal < sizeof(sound_temp); ++iVal)
     temporary_container[iVal] = sound_temp[iVal];
 
@@ -352,7 +340,7 @@ genetic_struct<T> genetic_lib<T>::read_chms_sound(int index) {
 
 template<class T>
 genetic_struct<T> genetic_lib<T>::eval_sound_from(int index) {
-  const auto& pId_temp =  chromosome_struct->get_parentIds();
+  const int pId_temp =  chromosome_struct->get_parentIds();
   if(pId_temp[index] != 0)
     pId_temp[index] = ((pId_temp[index] * 100) / chromosome_struct->SliderTot);
 
@@ -361,7 +349,7 @@ genetic_struct<T> genetic_lib<T>::eval_sound_from(int index) {
 
 template<class T>
 void genetic_lib<T>::evaluate_sound(int index) {
-  const auto& pId_temp =  chromosome_struct->get_parentIds();
+  const int pId_temp =  chromosome_struct->get_parentIds();
   if(pId_temp[index] != 0)
     pId_temp[index] = ((pId_temp[index] * 100) / chromosome_struct->SliderTot);
 
@@ -372,7 +360,7 @@ template<class T>
 void genetic_lib<T>::analize_sounds(long sound, long SliderTot) { if (sound != 0) sound = ((sound*100) / SliderTot); }
 template<class T>
 void genetic_lib<T>::analize_sounds() {
-  const auto& sound_temp =  chromosome_struct->get_sounds();
+  const long sound_temp =  chromosome_struct->get_sound();
   for(int iSound = 0; iSound < chromosome_struct->parameters; iSound++) {
     if (sound_temp[iSound] != 0)
         sound_temp[iSound] = ((sound_temp[iSound] * 100) / chromosome_struct->SliderTot);
@@ -452,7 +440,7 @@ template<class T>
 void genetic_lib<T>::begin_population(genetic_struct<T> chromosome_struct) {
     // chromosome_struct->parameters are fetched from arrays within a struct (type synonym)
     for(int pin = 0; pin < chromosome_struct.parameters; pin++) {
-    const auto& parent_a_temp =  chromosome_struct.get_soundsa();
+    const auto& parent_a_temp =  chromosome_struct.get_sound_a();
       parent_a_temp[pin] = random(set1A, set1B);
     }
 }
@@ -467,7 +455,7 @@ void genetic_lib<T>::begin_population(int mySound[]) {
 //
 template<class T>
 void genetic_lib<T>::add_sound_value(int value, int index) {
-  const auto& sound_temp = chromosome_struct->get_sounds(); //get_sounds();
+  const auto& sound_temp = chromosome_struct->get_sound(); //get_sound();
   sound_temp[index] = value;
 }
 
@@ -488,8 +476,8 @@ void genetic_lib<T>::add_parentId(int value, int index) {
 
 template<class T>
 void genetic_lib<T>::swap_sound_aValues() {
-  const auto& a_replacement =  chromosome_struct->get_soundsa();
-  const auto& b_replacement =  chromosome_struct->get_soundsb();
+  const auto& a_replacement =  chromosome_struct->get_sound_a();
+  const auto& b_replacement =  chromosome_struct->get_sound_b();
 
    swap_sound_aValues(a_replacement, b_replacement);
 }
@@ -501,8 +489,8 @@ void genetic_lib<T>::swap_sound_aValues(int my_soundA[], int my_soundB[]) {
 
 template<class T>
 void genetic_lib<T>::swap_sound_bValues() {
-  const auto& a_replacement =  chromosome_struct->get_soundsa();
-  const auto& b_replacement =  chromosome_struct->get_soundsb();
+  const auto& a_replacement =  chromosome_struct->get_sound_a();
+  const auto& b_replacement =  chromosome_struct->get_sound_b();
 
    swap_values(a_replacement, b_replacement);
 }
@@ -524,7 +512,7 @@ void genetic_lib<T>::swap_sound_bValues(int my_soundA[], int my_soundB[]) {
 template<class T>
 void genetic_lib<T>::evaluate_sound(int child[], int index, int mysound[]) {
   const auto& pId_temp = chromosome_struct->get_parentIds();
-  const auto& sound_temp = chromosome_struct->get_sounds();
+  const auto& sound_temp = chromosome_struct->get_sound();
 
     switch(sound_temp[index]) {
         case 0: check_lowerbound(child, index, pId_temp); break;
@@ -554,7 +542,7 @@ void genetic_lib<T>::start_roulette(T sound1, T sound2, T roulette, T roulette2)
 
 template<class T>
 void genetic_lib<T>::start_roulette(int index, int index2) {
-  const auto& sound_temp = chromosome_struct->get_sounds();
+  const auto& sound_temp = chromosome_struct->get_sound();
   bool isEqual = (chromosome_struct->get_roulette_value(0) >= sound_temp[index]
                  && chromosome_struct->get_roulette_value(0) <= sound_temp[index2])
                  && (chromosome_struct->get_roulette_value(1) >= sound_temp[index]
