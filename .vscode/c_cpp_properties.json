@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "compilerPath": "/usr/bin/clang",
+            "includePath": [
+                "~/Documents/Repositories"
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "clang-x64",
+            "compilerArgs": [
+                "${workspaceFolder}/**"
+            ],
+            "forcedInclude": [
+                "${workspaceFolder}/**"
+            ]
+        }
+    ],
+    "version": 4
+}

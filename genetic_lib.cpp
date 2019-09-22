@@ -1,4 +1,4 @@
-#include "../genetic_lib.hpp"
+#include "genetic_lib.hpp"
 #include <iostream>
 #include <random>
 

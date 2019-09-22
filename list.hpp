@@ -77,10 +77,10 @@ class list {
 
     //	Getters
     //----------------------------
-    int *get_sound_a() { return sound_a.get_dynamic_array(); }
-    int *get_sound_b() { return sound_b.get_dynamic_array(); }
-    int *get_parent_id() { return parent_id.get_dynamic_array(); }
-    long *get_sound() { return sound.get_dynamic_array(); }
+    int get_sound_a() { return sound_a.get_dynamic_array(); }
+    int get_sound_b() { return sound_b.get_dynamic_array(); }
+    int get_parent_id() { return parent_id.get_dynamic_array(); }
+    long get_sound() { return sound.get_dynamic_array(); }
 
     int get_roulette_value(int index) {
         if (index >= 0 && index < 2)
@@ -193,7 +193,7 @@ class list {
 
     list() {} // no passing of parameters on init required
     ~list() { this->dispose(); }
-    
+
 };
 
 #endif

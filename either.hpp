@@ -56,27 +56,27 @@ class either
 
     // methods
 
-    template<class T> 
-    T getValue() {
+    // template<class T> 
+    // T getValue() {
 
-    }
+    // }
 
-    void stream() { // find fist class functions in c++
-        A temp = this->element1 == nullptr ? this->element2 : this->element1;
+    // void stream() { // find fist class functions in c++
+    //     A temp = this->element1 == nullptr ? this->element2 : this->element1;
 
-        if(temp != nullptr) {
-            // do some operation that does not require the value to be returned
-        }
-    }
+    //     if(temp != nullptr) {
+    //         // do some operation that does not require the value to be returned
+    //     }
+    // }
 
-    template<class T>
-    auto stream() { // find fist class functions in c++
-        auto temp = this->element1 == nullptr ? this->element2 : this->element1;
+    // template<class T>
+    // auto stream() { // find fist class functions in c++
+    //     auto temp = this->element1 == nullptr ? this->element2 : this->element1;
 
-        if(temp != nullptr) {
-            // do some operation that does not require the value to be returned
-        }
-    }
+    //     if(temp != nullptr) {
+    //         // do some operation that does not require the value to be returned
+    //     }
+    // }
 
     // TODO: create error codes and error description
     // A getValue()
